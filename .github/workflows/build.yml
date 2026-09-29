@@ -265,14 +265,14 @@ jobs:
       shell: bash
       run: |
         set -euo pipefail
-        # KernelSU-Next (next) always uses the latest susfs4ksu gki branch tip so
-        # SUSFS stays API-matched to the always-latest KernelSU-Next tree. All
+        # WhiteSU (next) always uses the latest susfs4ksu gki branch tip so
+        # SUSFS stays API-matched to the always-latest WhiteSU tree. All
         # other roots (kernelsu, resukisu, sukisu-ultra) use the pinned
         # verified SUSFS commit.
         if [ "${{ inputs.root_flavor }}" = "next" ]; then
           BRANCH="gki-${{ inputs.android_version }}-${{ inputs.kernel_version }}"
           SUSFS_COMMIT="$(git ls-remote https://gitlab.com/simonpunk/susfs4ksu.git "refs/heads/${BRANCH}" | cut -f1)"
-          echo "KernelSU-Next: resolving SUSFS at latest on ${BRANCH} -> ${SUSFS_COMMIT}"
+          echo "WhiteSU: resolving SUSFS at latest on ${BRANCH} -> ${SUSFS_COMMIT}"
         else
           SUSFS_COMMIT="${{ inputs.susfs_commit }}"
           echo "Using pinned SUSFS commit: ${SUSFS_COMMIT}"
@@ -629,8 +629,8 @@ jobs:
         # Get KSU version from env (set by kernelsu action)
         KSU_VER="${KSU_VERSION:-N/A}"
         KSU_TAG="${KSU_GIT_TAG:-N/A}"
-        ROOT_IMPL="${ROOT_IMPLEMENTATION:-KernelSU-Next (legacy path)}"
-        ROOT_MANAGER="${ROOT_MANAGER:-KernelSU-Next Manager}"
+        ROOT_IMPL="${ROOT_IMPLEMENTATION:-WhiteSU (legacy path)}"
+        ROOT_MANAGER="${ROOT_MANAGER:-WhiteSU Manager}"
         ROOT_VERSION="${ROOT_VERSION:-${KSU_TAG}}"
         ROOT_SHA="${ROOT_COMMIT:-${KSU_COMMIT:-N/A}}"
         if [ "$NOMOUNT_ENABLED" = "true" ]; then
@@ -774,8 +774,8 @@ jobs:
 
         jq -n \
           --arg method "$METHOD" \
-          --arg root_implementation "${ROOT_IMPLEMENTATION:-KernelSU-Next (legacy path)}" \
-          --arg root_manager "${ROOT_MANAGER:-KernelSU-Next Manager}" \
+          --arg root_implementation "${ROOT_IMPLEMENTATION:-WhiteSU (legacy path)}" \
+          --arg root_manager "${ROOT_MANAGER:-WhiteSU Manager}" \
           --arg root_version "${ROOT_VERSION:-${KSU_GIT_TAG:-N/A}}" \
           --arg root_commit "${ROOT_COMMIT:-${KSU_COMMIT:-N/A}}" \
           --arg susfs_commit "${SUSFS_COMMIT:-N/A}" \

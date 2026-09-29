@@ -41,17 +41,17 @@ jobs:
           }
 
           github_latest_commit() {
-            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ***" "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.sha'
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ***" "https://api.github.com/repos/pershoot/WhiteSU/commits/dev-susfs" | jq -r '.sha'
           }
 
           github_latest_message() {
-            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ***" "https://api.github.com/repos/pershoot/KernelSU-Next/commits/dev-susfs" | jq -r '.commit.message | split("\n")[0]'
+            curl -fsSL --retry 5 --retry-delay 5 --retry-all-errors -H "Authorization: Bearer ***" "https://api.github.com/repos/pershoot/WhiteSU/commits/dev-susfs" | jq -r '.commit.message | split("\n")[0]'
           }
 
           {
             echo "# Commit Status Report"
             echo ""
-            echo "This report shows the latest upstream commit for each supported SUSFS branch plus KernelSU-Next."
+            echo "This report shows the latest upstream commit for each supported SUSFS branch plus WhiteSU."
             echo ""
           } >> "$summary_file"
 
@@ -81,7 +81,7 @@ jobs:
 
           {
             echo ""
-            echo "## KernelSU-Next"
+            echo "## WhiteSU"
             echo ""
             echo "| Branch | Latest Commit | Latest Message |"
             echo "| --- | --- | --- |"

@@ -74,14 +74,14 @@ on:
         description: "Root Flavor"
         type: choice
         options:
-          - KernelSU-Next
+          - WhiteSU
           - KernelSU
           - ReSukiSU
           - SukiSU-Ultra
           - KowSU
           - No Root
-          - All (KernelSU-Next + KernelSU + ReSukiSU)
-        default: All (KernelSU-Next + KernelSU + ReSukiSU)
+          - All (WhiteSU + KernelSU + ReSukiSU)
+        default: All (WhiteSU + KernelSU + ReSukiSU)
       use_susfs:
         description: "SUSFS"
         type: boolean
@@ -196,7 +196,7 @@ jobs:
 
           # Commit resolution mode. 'latest' (default) resolves branch tips at
           # run time via git ls-remote. 'verified' uses the audited pins below for
-          # NoMount, kernelsu/resukisu roots, and SUSFS; KernelSU-Next stays latest.
+          # NoMount, kernelsu/resukisu roots, and SUSFS; WhiteSU stays latest.
           # Scheduled (nightly) runs use latest by default.
           if [ "${{ github.event_name }}" = "schedule" ]; then
             COMMIT_MODE="${{ inputs.commit_mode || 'latest' }}"
@@ -276,21 +276,21 @@ jobs:
           # NoMount (pinned in verified mode, else dev tip)
           emit nomount_commit "$(pick "$PIN_NOMOUNT" https://github.com/maxsteeel/nomount.git refs/heads/dev)"
 
-          # KernelSU-Next manager - always built from the official repo's dev branch.
+          # WhiteSU manager - always built from the official repo's dev branch.
           # pershoot's fork is used only for the kernel SUSFS integration (root_commit below),
           # never for the manager. Manager always builds at latest.
-          emit kernelsu_commit "$(resolve_sha https://github.com/KernelSU-Next/KernelSU-Next.git refs/heads/dev)"
+          emit kernelsu_commit "$(resolve_sha https://github.com/White-Society/WhiteSU.git refs/heads/dev)"
           echo "kernelsu_branch=dev" >> "$GITHUB_OUTPUT"
 
           # Selected root implementation(s). Maps the human-facing choice
-          # (KernelSU-Next / KernelSU / ReSukiSU / SukiSU-Ultra / KowSU /
+          # (WhiteSU / KernelSU / ReSukiSU / SukiSU-Ultra / KowSU /
           # No Root / All) to internal root-setup flavors (next / kernelsu /
           # resukisu / sukisu-ultra / kowsu / none). 'All' emits a matrix of
           # the three core root flavors plus each pinned commit; SukiSU-Ultra,
           # KowSU, and No Root are opt-in only and never part of 'All'.
           #
           # kernelsu, resukisu, and sukisu-ultra pin in verified mode;
-          # KernelSU-Next (next) always builds at latest.
+          # WhiteSU (next) always builds at latest.
           # With SUSFS off, every root tracks latest instead of pins:
           # SukiSU-Ultra follows main (builtin only matters for SUSFS builds).
           if [ "${{ inputs.use_susfs }}" = "true" ]; then
@@ -310,9 +310,9 @@ jobs:
           KOWSU_COMMIT="$(resolve_sha https://github.com/KOWX712/KernelSU.git refs/heads/master)"
           emit kowsu_commit "$KOWSU_COMMIT"
           if [ "${{ inputs.use_susfs }}" = "true" ]; then
-            NEXT_COMMIT="$(resolve_sha https://github.com/pershoot/KernelSU-Next.git refs/heads/dev-susfs)"
+            NEXT_COMMIT="$(resolve_sha https://github.com/pershoot/WhiteSU.git refs/heads/dev-susfs)"
           else
-            NEXT_COMMIT="$(resolve_sha https://github.com/KernelSU-Next/KernelSU-Next.git refs/heads/dev)"
+            NEXT_COMMIT="$(resolve_sha https://github.com/White-Society/WhiteSU.git refs/heads/dev)"
           fi
 
           mk_entry() { # flavor variant commit
@@ -325,10 +325,10 @@ jobs:
               emit root_commit "$KERNELSU_COMMIT"
               ROOT_MATRIX="[$(mk_entry kernelsu KernelSU "$KERNELSU_COMMIT")]"
               ;;
-            KernelSU-Next)
+            WhiteSU)
               echo "root_flavor=next" >> "$GITHUB_OUTPUT"
               emit root_commit "$NEXT_COMMIT"
-              ROOT_MATRIX="[$(mk_entry next KernelSU-Next "$NEXT_COMMIT")]"
+              ROOT_MATRIX="[$(mk_entry next WhiteSU "$NEXT_COMMIT")]"
               ;;
             ReSukiSU)
               echo "root_flavor=resukisu" >> "$GITHUB_OUTPUT"
@@ -354,9 +354,9 @@ jobs:
               echo "root_commit=" >> "$GITHUB_OUTPUT"
               ROOT_MATRIX='[{"root_flavor":"none","variant":"NoRoot","root_commit":""}]'
               ;;
-            "All (KernelSU-Next + KernelSU + ReSukiSU)")
+            "All (WhiteSU + KernelSU + ReSukiSU)")
               # Fan out to all three root variants, each with its pinned commit.
-              ROOT_MATRIX="[$(mk_entry next KernelSU-Next "$NEXT_COMMIT"),$(mk_entry kernelsu KernelSU "$KERNELSU_COMMIT"),$(mk_entry resukisu ReSukiSU "$RESUKISU_COMMIT")]"
+              ROOT_MATRIX="[$(mk_entry next WhiteSU "$NEXT_COMMIT"),$(mk_entry kernelsu KernelSU "$KERNELSU_COMMIT"),$(mk_entry resukisu ReSukiSU "$RESUKISU_COMMIT")]"
               echo "root_flavor=" >> "$GITHUB_OUTPUT"
               echo "root_commit=" >> "$GITHUB_OUTPUT"
               ;;
@@ -369,7 +369,7 @@ jobs:
 
           # SUSFS per supported Android/kernel branch (gitlab simonpunk/susfs4ksu).
           # Always emit the verified pinned SHA here; build.yml overrides to the
-          # latest branch tip per-variant when the root flavor is KernelSU-Next.
+          # latest branch tip per-variant when the root flavor is WhiteSU.
           declare -A SUSFS_BRANCHES=(
             [susfs_commit_android12_5_10]="gki-android12-5.10"
             [susfs_commit_android13_5_10]="gki-android13-5.10"
@@ -405,7 +405,7 @@ jobs:
 
           # Credit: authenticated gh-API manager lookup adapted from EmberHeart-Kernels
           # commit ae9a341 (nullptr-t-oss/composite_actions fetch_ksu_manager).
-          # Each selected root must ship ALL manager APK builds. KernelSU-Next publishes
+          # Each selected root must ship ALL manager APK builds. WhiteSU publishes
           # its manager APKs (manager + manager-spoofed) from the official dev-tip
           # build-manager-ci run; kernelsu (KernelSU), ReSukiSU, SukiSU-Ultra,
           # and KowSU expose theirs as CI-run artifacts. All are pinned to an exact commit.
@@ -415,7 +415,7 @@ jobs:
             local owner repo wf stock
             case "$flavor" in
               next)
-                owner="KernelSU-Next"; repo="KernelSU-Next"; wf="build-manager-ci.yml"
+                owner="WhiteSU"; repo="WhiteSU"; wf="build-manager-ci.yml"
                 # Manager is built from the official dev-tip commit (grabbed at run start).
                 stock="${{ steps.resolve.outputs.kernelsu_commit }}"
                 run_id=$(gh api "repos/${owner}/${repo}/actions/workflows/${wf}/runs?head_sha=${stock}" \
@@ -523,7 +523,7 @@ jobs:
           LIST=""
           case "${FLAVORS}" in
             All*) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next)"$'\n'"$(resolve_one kernelsu)"$'\n'"$(resolve_one resukisu)") ;;
-            KernelSU-Next) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next)") ;;
+            WhiteSU) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next)") ;;
             KernelSU) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one kernelsu)") ;;
             ReSukiSU) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one resukisu)") ;;
             SukiSU-Ultra) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one sukisu-ultra)") ;;
@@ -548,7 +548,7 @@ jobs:
 
           # A Release/Pre-Release ships whichever manger build(s) were resolved
           # in the manager step above (exact match per root flavor). No root
-          # restriction applies here anymore -- KernelSU-Next, KernelSU, ReSukiSU,
+          # restriction applies here anymore -- WhiteSU, KernelSU, ReSukiSU,
           # SukiSU-Ultra, KowSU, or 'All' are all valid release targets ('No Root'
           # ships no manager).
 
@@ -1234,25 +1234,25 @@ jobs:
       run: |
         set -euo pipefail
 
-        KSU_REPO="https://github.com/pershoot/KernelSU-Next.git"
+        KSU_REPO="https://github.com/pershoot/WhiteSU.git"
         KSU_INPUT="dev-susfs"
 
         # Try as branch first, fall back to commit
         if git ls-remote --heads "$KSU_REPO" "$KSU_INPUT" | grep -q .; then
-          echo "Cloning KernelSU-Next from branch: $KSU_INPUT"
-          git clone --branch "$KSU_INPUT" "$KSU_REPO" /tmp/kernelsu-next
-          cd /tmp/kernelsu-next
+          echo "Cloning WhiteSU from branch: $KSU_INPUT"
+          git clone --branch "$KSU_INPUT" "$KSU_REPO" /tmp/WhiteSU
+          cd /tmp/WhiteSU
           KSUN_COMMIT=$(git rev-parse HEAD)
         else
-          echo "Cloning KernelSU-Next from dev-susfs branch, then checking out commit: $KSU_INPUT"
-          git clone --branch dev-susfs "$KSU_REPO" /tmp/kernelsu-next
-          cd /tmp/kernelsu-next
+          echo "Cloning WhiteSU from dev-susfs branch, then checking out commit: $KSU_INPUT"
+          git clone --branch dev-susfs "$KSU_REPO" /tmp/WhiteSU
+          cd /tmp/WhiteSU
           git fetch --depth=50 origin "$KSU_INPUT"
           git checkout "$KSU_INPUT"
           KSUN_COMMIT="$KSU_INPUT"
         fi
 
-        # The manager is built on the OFFICIAL KernelSU-Next repo
+        # The manager is built on the OFFICIAL WhiteSU repo
         # (pershoot's workflows are all disabled). Find the official dev
         # commit this fork's branch is synced with (merge-base of our
         # branch vs official dev), then link the manager build run for
@@ -1268,7 +1268,7 @@ jobs:
           return 1
         }
 
-        OFFICIAL_KSU_REPO="https://github.com/KernelSU-Next/KernelSU-Next.git"
+        OFFICIAL_KSU_REPO="https://github.com/White-Society/WhiteSU.git"
         retry git fetch "$OFFICIAL_KSU_REPO" dev
         STOCK_COMMIT=$(git merge-base HEAD FETCH_HEAD)
         echo "KSU Stock Commit (official sync point): $STOCK_COMMIT"
@@ -1285,9 +1285,9 @@ jobs:
         # Extract git tag at the sync point
         KSU_GIT_TAG=$(git describe --tags --abbrev=0 "$STOCK_COMMIT" 2>/dev/null || echo "no-tag")
 
-        MANAGER_RUN_ID=$(gh api "repos/KernelSU-Next/KernelSU-Next/actions/workflows/build-manager-ci.yml/runs?head_sha=${STOCK_COMMIT}" --jq '.workflow_runs[0].id // empty')
+        MANAGER_RUN_ID=$(gh api "repos/White-Society/WhiteSU/actions/workflows/build-manager-ci.yml/runs?head_sha=${STOCK_COMMIT}" --jq '.workflow_runs[0].id // empty')
         if [[ -n "${MANAGER_RUN_ID:-}" ]]; then
-          KSU_MANAGER="https://github.com/KernelSU-Next/KernelSU-Next/actions/runs/${MANAGER_RUN_ID}"
+          KSU_MANAGER="https://github.com/White-Society/WhiteSU/actions/runs/${MANAGER_RUN_ID}"
           KSU_MANAGER_NOTE="built from stock dev commit ${STOCK_COMMIT:0:12} (exact match)"
         else
           # Validated up-front in resolve-sources; a release cannot proceed without
@@ -1610,15 +1610,15 @@ jobs:
           try: _rmatrix={m.get("root_flavor",""):m.get("root_commit","") for m in json.loads(env("ROOT_MATRIX","[]")) if isinstance(m,dict)}
           except: pass
           if env("USE_SUSFS","true")=="true":
-              _next_url="https://github.com/pershoot/KernelSU-Next/commit/"
+              _next_url="https://github.com/pershoot/WhiteSU/commit/"
           else:
-              _next_url="https://github.com/KernelSU-Next/KernelSU-Next/commit/"
+              _next_url="https://github.com/White-Society/WhiteSU/commit/"
           _root_urls={"next":_next_url,"kernelsu":"https://github.com/tiann/KernelSU/commit/","resukisu":"https://github.com/ReSukiSU/ReSukiSU/commit/","sukisu-ultra":"https://github.com/SukiSU-Ultra/SukiSU-Ultra/commit/","kowsu":"https://github.com/KOWX712/KernelSU/commit/"}
           _root_commits={"next":_rmatrix.get("next","") or kernelsu_commit,"kernelsu":_rmatrix.get("kernelsu","") or ksu_commit,"resukisu":_rmatrix.get("resukisu","") or resukisu_commit,"sukisu-ultra":_rmatrix.get("sukisu-ultra","") or sukisu_ultra_commit,"kowsu":_rmatrix.get("kowsu","") or kowsu_commit}
           _flavors0=[m.get("flavor","") for m in parse_managers(env("MANAGER_LIST","")) if m.get("flavor","")]
           if not _flavors0:
-              _flavors0={"KernelSU-Next":["next"],"KernelSU":["kernelsu"],"ReSukiSU":["resukisu"],"SukiSU-Ultra":["sukisu-ultra"],"KowSU":["kowsu"],"No Root":[],"All":["next","kernelsu","resukisu"]}.get(root,["next","kernelsu","resukisu"])
-          _labels0={"next":"KernelSU-Next","kernelsu":"KernelSU","resukisu":"ReSukiSU","sukisu-ultra":"SukiSU-Ultra","kowsu":"KowSU"}
+              _flavors0={"WhiteSU":["next"],"KernelSU":["kernelsu"],"ReSukiSU":["resukisu"],"SukiSU-Ultra":["sukisu-ultra"],"KowSU":["kowsu"],"No Root":[],"All":["next","kernelsu","resukisu"]}.get(root,["next","kernelsu","resukisu"])
+          _labels0={"next":"WhiteSU","kernelsu":"KernelSU","resukisu":"ReSukiSU","sukisu-ultra":"SukiSU-Ultra","kowsu":"KowSU"}
           _rc=[]
           for _fl0 in _flavors0:
               _c=_root_commits.get(_fl0,"")
@@ -1657,8 +1657,8 @@ jobs:
           sus_map_sukisu_ultra={"android12-5.10":env("SUSFS_ANDROID12_5_10_SUKISU_ULTRA",""),"android13-5.10":env("SUSFS_ANDROID13_5_10_SUKISU_ULTRA",""),"android13-5.15":env("SUSFS_ANDROID13_5_15_SUKISU_ULTRA",""),"android14-5.15":env("SUSFS_ANDROID14_5_15_SUKISU_ULTRA",""),"android14-6.1":env("SUSFS_ANDROID14_6_1_SUKISU_ULTRA",""),"android15-6.6":env("SUSFS_ANDROID15_6_6_SUKISU_ULTRA",""),"android16-6.12":env("SUSFS_ANDROID16_6_12_SUKISU_ULTRA","")}
           _flavors=[m.get("flavor","") for m in parse_managers(env("MANAGER_LIST","")) if m.get("flavor","")]
           if not _flavors:
-              _flavors={"KernelSU-Next":["next"],"KernelSU":["kernelsu"],"ReSukiSU":["resukisu"],"SukiSU-Ultra":["sukisu-ultra"],"KowSU":["kowsu"],"No Root":[],"All":["next","kernelsu","resukisu"]}.get(root,["next","kernelsu","resukisu"])
-          _labels={"next":"KernelSU-Next","kernelsu":"KernelSU","resukisu":"ReSukiSU","sukisu-ultra":"SukiSU-Ultra","kowsu":"KowSU"}
+              _flavors={"WhiteSU":["next"],"KernelSU":["kernelsu"],"ReSukiSU":["resukisu"],"SukiSU-Ultra":["sukisu-ultra"],"KowSU":["kowsu"],"No Root":[],"All":["next","kernelsu","resukisu"]}.get(root,["next","kernelsu","resukisu"])
+          _labels={"next":"WhiteSU","kernelsu":"KernelSU","resukisu":"ReSukiSU","sukisu-ultra":"SukiSU-Ultra","kowsu":"KowSU"}
           _susfs_url="https://gitlab.com/simonpunk/susfs4ksu"
           lines.append("| SUSFS branch |" + "".join(f" {_labels.get(_fl,_fl)} |" for _fl in _flavors))
           lines.append("|---" * (len(_flavors) + 1) + "|")
