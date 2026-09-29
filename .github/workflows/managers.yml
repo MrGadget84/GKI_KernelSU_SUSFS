@@ -18,7 +18,7 @@ on:
           - SukiSU-Ultra
           - KowSU
           - No Root
-          - WhiteSU-SUSFS
+          - KernelSU-Next-SUSFS
         default: All
       kernelsu_next_commit:
         description: "Pin WhiteSU manager to this commit (40-char SHA, empty = latest dev tip)"
@@ -207,7 +207,7 @@ jobs:
                     exit 1
                   fi
                 else
-                  stock=$(resolve_sha https://github.com/pershoot/WhiteSU.git refs/heads/dev-susfs)
+                  stock=$(resolve_sha https://github.com/pershoot/KernelSU-next.git refs/heads/dev-susfs)
                   # fallback to upstream WhiteSU dev-susfs if pershoot fork tip not found
                   if ! [[ "$stock" =~ ^[0-9a-f]{40}$ ]]; then
                     stock=$(resolve_sha https://github.com/White-Society/WhiteSU.git refs/heads/dev-susfs)
@@ -336,7 +336,7 @@ jobs:
           case "${FLAVORS}" in
             All) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next)"$'\n'"$(resolve_one next-susfs)"$'\n'"$(resolve_one kernelsu)"$'\n'"$(resolve_one resukisu)") ;;
             WhiteSU) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next)") ;;
-            WhiteSU-SUSFS) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next-susfs)") ;;
+            KernelSU-Next-SUSFS) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one next-susfs)") ;;
             KernelSU) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one kernelsu)") ;;
             ReSukiSU) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one resukisu)") ;;
             SukiSU-Ultra) LIST=$(jq -c -n '[inputs]' <<< "$(resolve_one sukisu-ultra)") ;;
@@ -476,7 +476,7 @@ jobs:
             repo: https://github.com/White-Society/WhiteSU.git
             ref: dev
           - flavor: next-susfs
-            repo: https://github.com/pershoot/WhiteSU.git
+            repo: https://github.com/pershoot/KernelSU-next.git
             ref: dev-susfs
           - flavor: kernelsu
             repo: https://github.com/tiann/KernelSU.git
@@ -503,7 +503,7 @@ jobs:
           case "$WANT" in
             All*) echo "run=true" >> "$GITHUB_OUTPUT" ;;
             WhiteSU) [[ "$FLAVOR" == "next" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
-            WhiteSU-SUSFS) [[ "$FLAVOR" == "next-susfs" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
+            KernelSU-Next-SUSFS) [[ "$FLAVOR" == "next-susfs" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
             KernelSU) [[ "$FLAVOR" == "kernelsu" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
             ReSukiSU) [[ "$FLAVOR" == "resukisu" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
             SukiSU-Ultra) [[ "$FLAVOR" == "sukisu-ultra" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
@@ -673,7 +673,7 @@ jobs:
             repo: https://github.com/KOWX712/KernelSU.git
             ref: master
           - flavor: next-susfs
-            repo: https://github.com/pershoot/WhiteSU.git
+            repo: https://github.com/pershoot/KernelSU-next.git
             ref: dev-susfs
     env:
       FLAVOR: ${{ matrix.flavor }}
@@ -689,7 +689,7 @@ jobs:
           case "$WANT" in
             All*) echo "run=true" >> "$GITHUB_OUTPUT" ;;
             WhiteSU) [[ "$FLAVOR" == "next" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
-            WhiteSU-SUSFS) [[ "$FLAVOR" == "next-susfs" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
+            KernelSU-Next-SUSFS) [[ "$FLAVOR" == "next-susfs" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
             KernelSU) [[ "$FLAVOR" == "kernelsu" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
             ReSukiSU) [[ "$FLAVOR" == "resukisu" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
             SukiSU-Ultra) [[ "$FLAVOR" == "sukisu-ultra" ]] && echo "run=true" >> "$GITHUB_OUTPUT" || echo "run=false" >> "$GITHUB_OUTPUT" ;;
@@ -1103,14 +1103,14 @@ jobs:
               "ReSukiSU": env("RESUKISU_COMMIT") or "latest tip",
               "SukiSU-Ultra": env("SUKISU_ULTRA_COMMIT") or "latest tip",
               "KowSU": "latest tip",
-              "WhiteSU-SUSFS": env("NEXT_SUSFS_COMMIT") or "latest dev-susfs tip",
+              "KernelSU-Next-SUSFS": env("NEXT_SUSFS_COMMIT") or "latest dev-susfs tip",
           }
           # enrich from fetch path manager_list (pure commit info, same style as prebuilt)
           raw = env("MANAGER_LIST_FETCH")
           if raw:
               try:
                   for m in json.loads(raw):
-                      label = {"next":"WhiteSU","kernelsu":"KernelSU","resukisu":"ReSukiSU","sukisu-ultra":"SukiSU-Ultra","kowsu":"KowSU","next-susfs":"WhiteSU-SUSFS"}.get(m.get("flavor",""), "")
+                      label = {"next":"WhiteSU","kernelsu":"KernelSU","resukisu":"ReSukiSU","sukisu-ultra":"SukiSU-Ultra","kowsu":"KowSU","next-susfs":"KernelSU-Next-SUSFS"}.get(m.get("flavor",""), "")
                       if label and m.get("stock"):
                           commits[label] = m["stock"]
               except: pass
@@ -1120,7 +1120,7 @@ jobs:
           lines.append("## Features")
           lines.append("")
           if root == "All":
-              lines.append("- All manager flavors (WhiteSU, KernelSU, ReSukiSU, SukiSU-Ultra, WhiteSU-SUSFS)")
+              lines.append("- All manager flavors (WhiteSU, KernelSU, ReSukiSU, SukiSU-Ultra, KernelSU-Next-SUSFS)")
           else:
               lines.append(f"- {root}")
           lines.append(f"- {'Built from source' if src else 'Fetched prebuilt (upstream CI)'}")
