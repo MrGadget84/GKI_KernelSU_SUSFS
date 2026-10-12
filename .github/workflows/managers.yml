@@ -304,8 +304,8 @@ jobs:
 
               kowsu)
                 # KowSU has no SUSFS support and always tracks latest master.
-                owner="KOWX712"; repo="KernelSU"; wf="build-manager.yml"
-                stock=$(resolve_sha https://github.com/KOWX712/KernelSU.git refs/heads/master)
+                owner="White-Society"; repo="KernelSU"; wf="build-manager.yml"
+                stock=$(resolve_sha https://github.com/White-Society/KernelSU.git refs/heads/master)
                 run_id=$(gh api "repos/${owner}/${repo}/actions/workflows/${wf}/runs?head_sha=${stock}" \
                   --jq '.workflow_runs[0].id // empty')
                 if [[ -z "${run_id}" ]]; then
@@ -488,7 +488,7 @@ jobs:
             repo: https://github.com/SukiSU-Ultra/SukiSU-Ultra.git
             ref: main
           - flavor: kowsu
-            repo: https://github.com/KOWX712/KernelSU.git
+            repo: https://github.com/White-Society/KernelSU.git
             ref: master
     steps:
       - name: Gate on root_flavor filter
@@ -670,7 +670,7 @@ jobs:
             repo: https://github.com/SukiSU-Ultra/SukiSU-Ultra.git
             ref: main
           - flavor: kowsu
-            repo: https://github.com/KOWX712/KernelSU.git
+            repo: https://github.com/White-Society/KernelSU.git
             ref: master
           - flavor: next-susfs
             repo: https://github.com/pershoot/KernelSU-Next.git
