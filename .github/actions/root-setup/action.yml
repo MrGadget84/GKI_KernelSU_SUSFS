@@ -41,7 +41,7 @@ runs:
             manager="SukiSU-Ultra Manager"
             ;;
           kowsu)
-            repo="https://github.com/KOWX712/KernelSU.git"
+            repo="https://github.com/White-Society/KernelSU.git"
             directory="KowSU"
             manager="KowSU Manager"
             ;;
