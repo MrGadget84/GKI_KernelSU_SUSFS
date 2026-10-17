@@ -56,7 +56,7 @@ runs:
         fi
 
         if [ -d "${{ github.workspace }}/AnyKernel3" ]; then rm -rf "${{ github.workspace }}/AnyKernel3"; fi
-        retry git clone https://github.com/WildKernels/AnyKernel3.git -b gki-2.0 "${{ github.workspace }}/AnyKernel3"
+        retry git clone https://github.com/MrGadget84/AnyKernel3.git -b gki-2.0 "${{ github.workspace }}/AnyKernel3"
         if [ -n "${{ inputs.anykernel3_commit }}" ]; then
           # Same retry as the clone above.
           retry git -C "${{ github.workspace }}/AnyKernel3" fetch --depth=1 origin "${{ inputs.anykernel3_commit }}"
